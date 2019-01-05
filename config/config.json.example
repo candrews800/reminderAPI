@@ -1,0 +1,14 @@
+{
+  "defaults": {
+    "pg": {
+      "user": "pg_user",
+      "host": "ip_to_pg",
+      "database": "pg_db",
+      "password": "pg_password",
+      "port": 5432
+    }
+  },
+  "developerment": {
+
+  }
+}
