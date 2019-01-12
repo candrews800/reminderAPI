@@ -1,3 +1,3 @@
 const config = require("./config.json");
 
-module.exports = Object.assign({}, config.defaults, config.developerment);
+module.exports = Object.assign({}, config.defaults, config.development);

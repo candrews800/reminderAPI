@@ -8,7 +8,8 @@
       "port": 5432
     }
   },
-  "developerment": {
-
+  "development": {
+    "serverPort": 3000,
+    "sessionSecret": "supersecret"
   }
 }

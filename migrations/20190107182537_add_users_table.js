@@ -1,16 +1,16 @@
 "use string";
 
 exports.up = function(knex, Promise) {
-    return knex.schema.createTable('users', function (table) {
+    return knex.schema.createTable("users", function (table) {
         table.increments();
         table.timestamps();
-        table.string('email');
-        table.string('hash');
-        table.string('salt');
-        table.json('details');
+        table.string("email");
+        table.string("hash");
+        table.string("salt");
+        table.json("details");
     });
 };
 
 exports.down = function(knex, Promise) {
-    return knex.schema.dropTable('users');
+    return knex.schema.dropTable("users");
 };
