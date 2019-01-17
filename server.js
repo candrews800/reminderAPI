@@ -5,14 +5,14 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
 const session = require("express-session");
-const config = require("./config/config");
+const config = require("config/config");
 
 const PORT = config.serverPort;
 const app = express();
 
 // configuration ===============================================================
 
-require("./config/passport")(passport);
+require("config/passport")(passport);
 
 // set up our express application
 app.use(morgan("combined")); // log every request to the console
@@ -30,7 +30,7 @@ app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
 
 // routes ======================================================================
-require("./app/routes.js")(app, passport); // load our routes and pass in our app and fully configured passport
+require("app/routes.js")(app, passport); // load our routes and pass in our app and fully configured passport
 
 // launch ======================================================================
 app.listen(PORT);

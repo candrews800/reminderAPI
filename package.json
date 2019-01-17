@@ -4,8 +4,8 @@
   "description": "API for date reminder app",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "test": "mocha"
+    "start": "NODE_PATH=. node server.js",
+    "test": "NODE_PATH=. mocha"
   },
   "author": "Clinton Andrews",
   "license": "ISC",
