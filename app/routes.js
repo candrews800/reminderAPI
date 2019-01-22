@@ -6,5 +6,7 @@ module.exports = function(app, passport) {
 
     app.get("/reminders", reminderRoutes.getReminders);
     app.post("/reminders", reminderRoutes.postReminder);
+    app.put("/reminders", reminderRoutes.putReminder);
+    app.delete("/reminders", reminderRoutes.deleteReminder);
 };
 

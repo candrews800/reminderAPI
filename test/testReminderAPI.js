@@ -13,6 +13,7 @@ let req, res;
 
 const getDefaultReq = () => {
 	return {
+		params: {},
 		user: userSeeder.USER_1
 	};
 };
@@ -185,9 +186,186 @@ describe("Reminder API", () => {
 
 			assert.equal(res.responseCode, 200);
 		});
+
+		it("should return 404 status code when provided with id that does not match anything", async () => {
+			const reminder = {
+				remind_on: "2019-04-01",
+			};
+
+			const reqEditReminder = Object.assign({}, req, {
+				body: reminder,
+				params: {
+					id: 1234567890
+				}
+			});
+
+			await reminderRoutes.putReminder(reqEditReminder, res);
+
+			assert.equal(res.responseCode, 404);
+		});
+
+		it("should save new reminder details in db", async () => {
+			const REMINDER_ID = 1;
+			const REMINDER_DATE = "2020-04-01";
+			const reminder = {
+				remind_on: REMINDER_DATE,
+			};
+
+			const reqEditReminder = Object.assign({}, req, {
+				body: reminder,
+				params: {
+					id: REMINDER_ID
+				}
+			});
+
+			await reminderRoutes.putReminder(reqEditReminder, res);
+
+			const actualReminder = await knex("reminders")
+				.where("id", REMINDER_ID)
+				.first();
+
+			assert.equal(moment(actualReminder.remind_on).format(DATE_FORMAT), REMINDER_DATE);
+		});
+
+		it("should respond with 400 status code if remind_on is not set", async () => {
+			const reminder = {
+
+			};
+
+			const reqEditReminder = Object.assign({}, req, {
+				body: reminder,
+				params: {
+					id: 1
+				}
+			});
+
+			await reminderRoutes.putReminder(reqEditReminder, res);
+
+			assert.equal(res.responseCode, 400);
+		});
+
+		it("should respond with 400 status code if remind_on is a bad format", async () => {
+			const reminder = {
+				remind_on: "a bad date format"
+			};
+
+			const reqEditReminder = Object.assign({}, req, {
+				body: reminder,
+				params: {
+					id: 1
+				}
+			});
+
+			await reminderRoutes.putReminder(reqEditReminder, res);
+
+			assert.equal(res.responseCode, 400);
+		});
+
+		it("should return 400 status code if no user is in request", async () => {
+			const reminder = {
+				remind_on: "2019-04-01",
+			};
+
+			const reqEditReminder = Object.assign({}, req, {
+				body: reminder,
+				params: {
+					id: 1
+				},
+				user: null
+			});
+
+			await reminderRoutes.putReminder(reqEditReminder, res);
+
+			assert.equal(res.responseCode, 400);
+		});
+
+		it("should return 400, when user tries to edit reminder not owned by them", async () => {
+			const reminder = {
+				remind_on: "2019-04-01",
+			};
+
+			const reqEditReminder = Object.assign({}, req, {
+				body: reminder,
+				params: {
+					id: 1
+				},
+				user: {
+					id: 123456
+				}
+			});
+
+			await reminderRoutes.putReminder(reqEditReminder, res);
+
+			assert.equal(res.responseCode, 400);
+		});
+
+		it("should keep reminder info the same, when user tries to edit reminder not owned by them", async () => {
+			const REMINDER_ID = 1;
+			const START_DATE = reminderSeeder.REMINDERS[REMINDER_ID - 1].remind_on;
+			const reminder = {
+				remind_on: "2020-09-10",
+			};
+
+			const reqEditReminder = Object.assign({}, req, {
+				body: reminder,
+				params: {
+					id: REMINDER_ID
+				},
+				user: {
+					id: 123456
+				}
+			});
+
+			await reminderRoutes.putReminder(reqEditReminder, res);
+
+			const actualReminder = await knex("reminders")
+				.where("id", REMINDER_ID)
+				.first();
+
+			assert.equal(moment(actualReminder.remind_on).format(DATE_FORMAT), START_DATE);
+		});
+
+		it("should return 400, when user tries to set id", async () => {
+			const reminder = {
+				id: 1234,
+				remind_on: "2019-04-01",
+			};
+
+			const reqEditReminder = Object.assign({}, req, {
+				body: reminder,
+				params: {
+					id: 1
+				}
+			});
+
+			await reminderRoutes.putReminder(reqEditReminder, res);
+
+			assert.equal(res.responseCode, 400);
+		});
+
+		it("should return 400, when user tries to set user_id", async () => {
+			const reminder = {
+				user_id: 1234,
+				remind_on: "2019-04-01",
+			};
+
+			const reqEditReminder = Object.assign({}, req, {
+				body: reminder,
+				params: {
+					id: 1
+				}
+			});
+
+			await reminderRoutes.putReminder(reqEditReminder, res);
+
+			assert.equal(res.responseCode, 400);
+		});
 	});
 
 	describe("DELETE /reminder/{id}", () => {
+		it("should return 200 when id exists", async () => {
 
+			assert.equal(res.responseCode, 200);
+		});
 	});
 });
