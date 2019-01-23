@@ -78,7 +78,32 @@ const putReminder = async (req, res) => {
 };
 
 const deleteReminder = async (req, res) => {
+    const user = req.user;
 
+    if (!user) {
+        res.statusCode(400).send("No user.");
+        return;
+    }
+
+    const reminder = await knex("reminders")
+        .where("id", req.params.id)
+        .first();
+
+    if (!reminder) {
+        res.statusCode(404).json();
+        return;
+    }
+
+    if (user.id !== reminder.user_id) {
+        res.statusCode(400).send("Cannot edit reminder you do not own.");
+        return;
+    }
+
+    await knex("reminders")
+        .where("id", req.params.id)
+        .delete();
+
+    res.statusCode(200).json({});
 };
 
 const validReminder = (reminder) => {

@@ -364,8 +364,79 @@ describe("Reminder API", () => {
 
 	describe("DELETE /reminder/{id}", () => {
 		it("should return 200 when id exists", async () => {
+			const reqDeleteReminder = Object.assign({}, req, {
+				params: {
+					id: 1
+				}
+			});
+
+			await reminderRoutes.deleteReminder(reqDeleteReminder, res);
 
 			assert.equal(res.responseCode, 200);
+		});
+
+		it("should return 404 when id does not exist", async () => {
+			const reqDeleteReminder = Object.assign({}, req, {
+				params: {
+					id: 123456789
+				}
+			});
+
+			await reminderRoutes.deleteReminder(reqDeleteReminder, res);
+
+			assert.equal(res.responseCode, 404);
+		});
+
+		it("should return 400 when no user provided", async () => {
+			const reqDeleteReminder = Object.assign({}, req, {
+				user: null,
+				params: {
+					id: 1
+				}
+			});
+
+			await reminderRoutes.deleteReminder(reqDeleteReminder, res);
+
+			assert.equal(res.responseCode, 400);
+		});
+
+		it("should return 400 when trying to delete reminder that does not belong to user", async () => {
+			const reqDeleteReminder = Object.assign({}, req, {
+				user: {
+					id: 123456
+				},
+				params: {
+					id: 1
+				}
+			});
+
+			await reminderRoutes.deleteReminder(reqDeleteReminder, res);
+
+			assert.equal(res.responseCode, 400);
+		});
+
+		it("should delete reminder on good request", async () => {
+			// check that reminder exists before requesting delete to ensure db state changes
+			const REMINDER_ID = 1;
+			let reminder = await knex("reminders")
+				.where("id", REMINDER_ID)
+				.first();
+
+			assert.equal(reminder.id, REMINDER_ID);
+
+			const reqDeleteReminder = Object.assign({}, req, {
+				params: {
+					id: REMINDER_ID
+				}
+			});
+
+			await reminderRoutes.deleteReminder(reqDeleteReminder, res);
+
+			reminder = await knex("reminders")
+				.where("id", REMINDER_ID)
+				.first();
+
+			assert.equal(reminder, undefined);
 		});
 	});
 });
