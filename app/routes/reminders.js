@@ -1,13 +1,15 @@
 const moment = require("moment");
 
 const knex = require("config/knex");
+const NotAuthorizedError = require("app/lib/errors/NotAuthorizedError");
+const ValidationError = require("app/lib/errors/ValidationError");
+const NotFoundError = require("app/lib/errors/NotFoundError");
 
 const getReminders = async (req, res) => {
     const user = req.user;
 
     if (!user) {
-        res.statusCode(400).send("No user.");
-        return;
+        throw new NotAuthorizedError();
     }
 
     const reminders = await knex("reminders")
@@ -21,16 +23,14 @@ const postReminder = async (req, res) => {
     const user = req.user;
 
     if (!user) {
-        res.statusCode(400).send("No user.");
-        return;
+        throw new NotAuthorizedError();
     }
 
     const reminder = req.body;
 
     const err = validReminder(reminder);
     if (err !== true) {
-        res.statusCode(400).send(err);
-        return;
+        throw new ValidationError(err);
     }
 
     reminder.user_id = user.id;
@@ -46,8 +46,7 @@ const putReminder = async (req, res) => {
     const user = req.user;
 
     if (!user) {
-        res.statusCode(400).send("No user.");
-        return;
+        throw new NotAuthorizedError();
     }
 
     const reminder = await knex("reminders")
@@ -55,19 +54,16 @@ const putReminder = async (req, res) => {
         .first();
 
     if (!reminder) {
-        res.statusCode(404).json();
-        return;
+        throw new NotFoundError();
     }
 
     if (user.id !== reminder.user_id) {
-        res.statusCode(400).send("Cannot edit reminder you do not own.");
-        return;
+        throw new NotAuthorizedError();
     }
 
     const err = validReminder(req.body);
     if (err !== true) {
-        res.statusCode(400).send(err);
-        return;
+        throw new ValidationError(err);
     }
 
     await knex("reminders")
@@ -81,8 +77,7 @@ const deleteReminder = async (req, res) => {
     const user = req.user;
 
     if (!user) {
-        res.statusCode(400).send("No user.");
-        return;
+        throw new NotAuthorizedError();
     }
 
     const reminder = await knex("reminders")
@@ -90,13 +85,11 @@ const deleteReminder = async (req, res) => {
         .first();
 
     if (!reminder) {
-        res.statusCode(404).json();
-        return;
+        throw new NotFoundError();
     }
 
     if (user.id !== reminder.user_id) {
-        res.statusCode(400).send("Cannot edit reminder you do not own.");
-        return;
+        throw new NotAuthorizedError();
     }
 
     await knex("reminders")

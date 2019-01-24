@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
 const session = require("express-session");
 const config = require("config/config");
+const errorHandler = require("app/lib/error_handler");
 
 const PORT = config.serverPort;
 const app = express();
@@ -28,6 +29,8 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
+
+app.use(errorHandler);
 
 // routes ======================================================================
 require("app/routes.js")(app, passport); // load our routes and pass in our app and fully configured passport

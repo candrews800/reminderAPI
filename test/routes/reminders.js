@@ -2,10 +2,15 @@ const assert = require("assert");
 const moment = require("moment");
 
 const knex = require("config/knex");
+
 const seeder = require("seeds/seed");
 const userSeeder = require("seeds/lib/seed_users");
 const reminderSeeder = require("seeds/lib/seed_reminders");
 const reminderRoutes = require("app/routes/reminders");
+
+const NotAuthorizedError = require("app/lib/errors/NotAuthorizedError");
+const ValidationError = require("app/lib/errors/ValidationError");
+const NotFoundError = require("app/lib/errors/NotFoundError");
 
 const DATE_FORMAT = "YYYY-MM-DD";
 
@@ -35,6 +40,17 @@ const getDefaultRes = () => {
 			return this;
 		}
 	};
+};
+
+const assertThrowsAsync = async (fn, _Class) => {
+	let f = () => {};
+	try {
+		await fn();
+	} catch(e) {
+		f = () => {throw e};
+	} finally {
+		assert.throws(f, _Class);
+	}
 };
 
 describe("Reminder API", () => {
@@ -72,14 +88,12 @@ describe("Reminder API", () => {
 			assert.equal(res.response.length, 0);
 		});
 
-		it("should return 400 status code if no user is in request", async () => {
+		it("should throw not authorized error if no user is in request", async () => {
 			const noUserReq = Object.assign({}, req);
 
 			delete noUserReq.user;
 
-			await reminderRoutes.getReminders(noUserReq, res);
-
-			assert.equal(res.responseCode, 400);
+			await assertThrowsAsync(reminderRoutes.getReminders.bind(this, noUserReq, res), NotAuthorizedError);
 		});
 	});
 
@@ -115,17 +129,15 @@ describe("Reminder API", () => {
 			assert.equal(response.hasOwnProperty("id"), true, "should have id attached");
 		});
 
-		it("should respond with 400 status code when called without the user object", async () => {
+		it("should throw not authorized error when called without the user object", async () => {
 			const reqWithNoUser = Object.assign({}, req, {
 				user: null
 			});
 
-			await reminderRoutes.postReminder(reqWithNoUser, res);
-
-			assert.equal(res.responseCode, 400);
+			await assertThrowsAsync(reminderRoutes.postReminder.bind(this, reqWithNoUser, res), NotAuthorizedError);
 		});
 
-		it("should respond with 400 status code if id is already set", async () => {
+		it("should throw validation error if id is already set", async () => {
 			const reminder = {
 				id: 100,
 				remind_on: moment("2019-04-01").format(DATE_FORMAT)
@@ -135,12 +147,10 @@ describe("Reminder API", () => {
 				body: reminder
 			});
 
-			await reminderRoutes.postReminder(reqWithReminderAttached, res);
-
-			assert.equal(res.responseCode, 400);
+			await assertThrowsAsync(reminderRoutes.postReminder.bind(this, reqWithReminderAttached, res), ValidationError);
 		});
 
-		it("should respond with 400 status code if remind_on is not set", async () => {
+		it("should throw validation error if remind_on is not set", async () => {
 			const reminder = {
 				remind_on: "not a real date"
 			};
@@ -149,12 +159,10 @@ describe("Reminder API", () => {
 				body: reminder
 			});
 
-			await reminderRoutes.postReminder(reqWithReminderAttached, res);
-
-			assert.equal(res.responseCode, 400);
+			await assertThrowsAsync(reminderRoutes.postReminder.bind(this, reqWithReminderAttached, res), ValidationError);
 		});
 
-		it("should respond with 400 status code if remind_on is a bad format", async () => {
+		it("should throw validation error if remind_on is a bad format", async () => {
 			const reminder = {
 				remind_on: "not a real date"
 			};
@@ -163,9 +171,7 @@ describe("Reminder API", () => {
 				body: reminder
 			});
 
-			await reminderRoutes.postReminder(reqWithReminderAttached, res);
-
-			assert.equal(res.responseCode, 400);
+			await assertThrowsAsync(reminderRoutes.postReminder.bind(this, reqWithReminderAttached, res), ValidationError);
 		});
 	});
 
@@ -187,7 +193,7 @@ describe("Reminder API", () => {
 			assert.equal(res.responseCode, 200);
 		});
 
-		it("should return 404 status code when provided with id that does not match anything", async () => {
+		it("should throw not found error when provided with id that does not match anything", async () => {
 			const reminder = {
 				remind_on: "2019-04-01",
 			};
@@ -199,9 +205,7 @@ describe("Reminder API", () => {
 				}
 			});
 
-			await reminderRoutes.putReminder(reqEditReminder, res);
-
-			assert.equal(res.responseCode, 404);
+			await assertThrowsAsync(reminderRoutes.putReminder.bind(this, reqEditReminder, res), NotFoundError);
 		});
 
 		it("should save new reminder details in db", async () => {
@@ -227,7 +231,7 @@ describe("Reminder API", () => {
 			assert.equal(moment(actualReminder.remind_on).format(DATE_FORMAT), REMINDER_DATE);
 		});
 
-		it("should respond with 400 status code if remind_on is not set", async () => {
+		it("should throw validation error if remind_on is not set", async () => {
 			const reminder = {
 
 			};
@@ -239,12 +243,10 @@ describe("Reminder API", () => {
 				}
 			});
 
-			await reminderRoutes.putReminder(reqEditReminder, res);
-
-			assert.equal(res.responseCode, 400);
+			await assertThrowsAsync(reminderRoutes.putReminder.bind(this, reqEditReminder, res), ValidationError);
 		});
 
-		it("should respond with 400 status code if remind_on is a bad format", async () => {
+		it("should throw validation error if remind_on is a bad format", async () => {
 			const reminder = {
 				remind_on: "a bad date format"
 			};
@@ -256,12 +258,10 @@ describe("Reminder API", () => {
 				}
 			});
 
-			await reminderRoutes.putReminder(reqEditReminder, res);
-
-			assert.equal(res.responseCode, 400);
+			await assertThrowsAsync(reminderRoutes.putReminder.bind(this, reqEditReminder, res), ValidationError);
 		});
 
-		it("should return 400 status code if no user is in request", async () => {
+		it("should throw not authorized error if no user is in request", async () => {
 			const reminder = {
 				remind_on: "2019-04-01",
 			};
@@ -274,12 +274,10 @@ describe("Reminder API", () => {
 				user: null
 			});
 
-			await reminderRoutes.putReminder(reqEditReminder, res);
-
-			assert.equal(res.responseCode, 400);
+			await assertThrowsAsync(reminderRoutes.putReminder.bind(this, reqEditReminder, res), NotAuthorizedError);
 		});
 
-		it("should return 400, when user tries to edit reminder not owned by them", async () => {
+		it("should throw not authorized error when user tries to edit reminder not owned by them", async () => {
 			const reminder = {
 				remind_on: "2019-04-01",
 			};
@@ -294,9 +292,8 @@ describe("Reminder API", () => {
 				}
 			});
 
-			await reminderRoutes.putReminder(reqEditReminder, res);
 
-			assert.equal(res.responseCode, 400);
+			await assertThrowsAsync(reminderRoutes.putReminder.bind(this, reqEditReminder, res), NotAuthorizedError);
 		});
 
 		it("should keep reminder info the same, when user tries to edit reminder not owned by them", async () => {
@@ -316,7 +313,11 @@ describe("Reminder API", () => {
 				}
 			});
 
-			await reminderRoutes.putReminder(reqEditReminder, res);
+			try {
+				await reminderRoutes.putReminder(reqEditReminder, res);
+			} catch (e) {
+				// ignore
+			}
 
 			const actualReminder = await knex("reminders")
 				.where("id", REMINDER_ID)
@@ -325,7 +326,7 @@ describe("Reminder API", () => {
 			assert.equal(moment(actualReminder.remind_on).format(DATE_FORMAT), START_DATE);
 		});
 
-		it("should return 400, when user tries to set id", async () => {
+		it("should throw validation error, when user tries to set id", async () => {
 			const reminder = {
 				id: 1234,
 				remind_on: "2019-04-01",
@@ -338,12 +339,10 @@ describe("Reminder API", () => {
 				}
 			});
 
-			await reminderRoutes.putReminder(reqEditReminder, res);
-
-			assert.equal(res.responseCode, 400);
+			await assertThrowsAsync(reminderRoutes.putReminder.bind(this, reqEditReminder, res), ValidationError);
 		});
 
-		it("should return 400, when user tries to set user_id", async () => {
+		it("should throw validation error, when user tries to set user_id", async () => {
 			const reminder = {
 				user_id: 1234,
 				remind_on: "2019-04-01",
@@ -356,9 +355,7 @@ describe("Reminder API", () => {
 				}
 			});
 
-			await reminderRoutes.putReminder(reqEditReminder, res);
-
-			assert.equal(res.responseCode, 400);
+			await assertThrowsAsync(reminderRoutes.putReminder.bind(this, reqEditReminder, res), ValidationError);
 		});
 	});
 
@@ -375,19 +372,17 @@ describe("Reminder API", () => {
 			assert.equal(res.responseCode, 200);
 		});
 
-		it("should return 404 when id does not exist", async () => {
+		it("should throw not found error when id does not exist", async () => {
 			const reqDeleteReminder = Object.assign({}, req, {
 				params: {
 					id: 123456789
 				}
 			});
 
-			await reminderRoutes.deleteReminder(reqDeleteReminder, res);
-
-			assert.equal(res.responseCode, 404);
+			await assertThrowsAsync(reminderRoutes.deleteReminder.bind(this, reqDeleteReminder, res), NotFoundError);
 		});
 
-		it("should return 400 when no user provided", async () => {
+		it("should throw not authorized error when no user provided", async () => {
 			const reqDeleteReminder = Object.assign({}, req, {
 				user: null,
 				params: {
@@ -395,12 +390,10 @@ describe("Reminder API", () => {
 				}
 			});
 
-			await reminderRoutes.deleteReminder(reqDeleteReminder, res);
-
-			assert.equal(res.responseCode, 400);
+			await assertThrowsAsync(reminderRoutes.deleteReminder.bind(this, reqDeleteReminder, res), NotAuthorizedError);
 		});
 
-		it("should return 400 when trying to delete reminder that does not belong to user", async () => {
+		it("should throw not authorized error when trying to delete reminder that does not belong to user", async () => {
 			const reqDeleteReminder = Object.assign({}, req, {
 				user: {
 					id: 123456
@@ -410,9 +403,7 @@ describe("Reminder API", () => {
 				}
 			});
 
-			await reminderRoutes.deleteReminder(reqDeleteReminder, res);
-
-			assert.equal(res.responseCode, 400);
+			await assertThrowsAsync(reminderRoutes.deleteReminder.bind(this, reqDeleteReminder, res), NotAuthorizedError);
 		});
 
 		it("should delete reminder on good request", async () => {
