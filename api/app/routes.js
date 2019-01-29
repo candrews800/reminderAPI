@@ -1,4 +1,4 @@
-const reminderRoutes = require("routes/reminders");
+const reminderRoutes = require("app/routes/reminders");
 
 // app/routes.js
 module.exports = function(app, passport) {
