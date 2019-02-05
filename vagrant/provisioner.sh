@@ -1,21 +1,16 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # APT-GET UPDATE
 sudo apt-get update
 
-# INSTALL NODE
-if ! type -P node
-then
-    echo "downloading node..."
-    curl -sL https://deb.nodesource.com/setup_11.x | sudo -E bash -
-    echo "installing node..."
-    sudo apt-get install -y nodejs
-else
-    echo "node already installed."
-fi
+cd /opt/important_date_reminders/vagrant
 
-# INSTALL POSTGRES
+/bin/bash ./provisioners/node.sh
 
-# API NPM INSTALL
-cd /opt/important_date_reminders/api
-npm install
+/bin/bash ./provisioners/api.sh
+
+/bin/bash ./provisioners/postgres.sh
+
+/bin/bash ./provisioners/migrations.sh
+
+/bin/bash ./provisioners/start-services.sh

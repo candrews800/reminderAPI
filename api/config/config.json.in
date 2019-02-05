@@ -1,10 +1,10 @@
 {
   "defaults": {
     "pg": {
-      "user": "pg_user",
-      "host": "ip_to_pg",
-      "database": "pg_db",
-      "password": "pg_password",
+      "user": "$PG_USER",
+      "host": "localhost",
+      "database": "$PG_DB",
+      "password": "$PG_PW",
       "port": 5432
     }
   },
