@@ -1,0 +1,15 @@
+{
+  "defaults": {
+    "pg": {
+      "user": "$PG_USER",
+      "host": "localhost",
+      "database": "$PG_DB",
+      "password": "$PG_PW",
+      "port": 5432
+    }
+  },
+  "development": {
+    "serverPort": 3000,
+    "sessionSecret": "supersecret"
+  }
+}
