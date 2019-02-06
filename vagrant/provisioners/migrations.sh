@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /opt/important_date_reminders/api
+cd $BASE_PATH/api
 
 npm install knex -g
 

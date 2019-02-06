@@ -5,6 +5,8 @@ sudo apt-get update
 
 cd /opt/important_date_reminders/vagrant
 
+source ../app.conf
+
 /bin/bash ./provisioners/node.sh
 
 /bin/bash ./provisioners/api.sh

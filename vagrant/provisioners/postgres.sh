@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source ../app.conf
-
 ## INSTALL POSTGRES
 if ! type -P psql
 then
@@ -12,5 +10,5 @@ else
 fi
 
 sudo -i -u postgres psql -c "CREATE USER $PG_USER WITH PASSWORD '$PG_PW';"
-sudo -i -u postgres psql -c "CREATE DATABASE important_date_reminder;"
-sudo -i -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE important_date_reminder TO important_date_reminder;"
+sudo -i -u postgres psql -c "CREATE DATABASE $PG_DB;"
+sudo -i -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE $PG_DB TO $PG_USER;"
