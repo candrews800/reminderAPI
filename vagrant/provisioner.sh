@@ -11,6 +11,8 @@ source ../app.conf
 
 /bin/bash ./provisioners/api.sh
 
+/bin/bash ./provisioners/reminder.sh
+
 /bin/bash ./provisioners/postgres.sh
 
 /bin/bash ./provisioners/migrations.sh
