@@ -1,6 +1,6 @@
 module.exports = {
-    doSeed: function (knex) {
-        return knex("reminders").insert(this.REMINDERS);
+    doSeed: function (knex, REMINDERS) {
+        return knex("reminders").insert(REMINDERS || this.REMINDERS);
     },
     REMINDERS: [
         {

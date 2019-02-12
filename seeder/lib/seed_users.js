@@ -1,7 +1,7 @@
 
 module.exports = {
-    doSeed: function (knex) {
-        return knex("users").insert([
+    doSeed: function (knex, USERS) {
+        return knex("users").insert(USERS || [
             this.USER_1
         ]);
     },

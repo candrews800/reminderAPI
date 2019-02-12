@@ -6,6 +6,7 @@ const knex = require("config/knex");
 const seeder = require("seeds/seed");
 const userSeeder = require("seeds/lib/seed_users");
 const reminderSeeder = require("seeds/lib/seed_reminders");
+
 const reminderRoutes = require("app/routes/reminders");
 
 const NotAuthorizedError = require("app/lib/errors/NotAuthorizedError");

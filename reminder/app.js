@@ -1,6 +1,4 @@
-const getReadyReminders = async () => {
-    return [123, 456, 789];
-};
+const getReadyReminders = require("lib/get_ready_reminders");
 
 const processReminder = async (reminder) => {
     console.log(reminder);
@@ -27,9 +25,7 @@ setInterval(() => {
     return runService(() => { running = false; });
 }, 1000);
 
-// export functions to test implementation
 module.exports = {
     runService,
-    getReadyReminders,
     processReminder
 };
