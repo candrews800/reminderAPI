@@ -18,6 +18,7 @@ const runService = async (onFinish) => {
 // unless the previous seconds's reminders have not completed
 
 let running = false;
+
 setInterval(() => {
     if (running) {
         return;
