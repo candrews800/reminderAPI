@@ -14,6 +14,9 @@ const runService = async (onFinish) => {
     onFinish();
 };
 
+// Query and process reminders every second
+// unless the previous seconds's reminders have not completed
+
 let running = false;
 setInterval(() => {
     if (running) {
@@ -24,8 +27,3 @@ setInterval(() => {
 
     return runService(() => { running = false; });
 }, 1000);
-
-module.exports = {
-    runService,
-    processReminder
-};
