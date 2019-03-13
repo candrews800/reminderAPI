@@ -54,6 +54,17 @@ const assertThrowsAsync = async (fn, _Class) => {
 	}
 };
 
+const getDefaultSchedule = () => {
+	return {
+		month: 8,
+		day: 24,
+		morningOf: false,
+		startOfMonth: false,
+		weeksPrior: [],
+		daysPrior: []
+	};
+};
+
 describe("Reminder API", () => {
 	beforeEach(async () => {
 		await seeder.seed(knex);
@@ -101,7 +112,7 @@ describe("Reminder API", () => {
 	describe("POST /reminders", () => {
 		it("should return 200 status code when provided with valid reminder object", async () => {
 			const reminder = {
-				remind_on: "2019-04-01",
+				schedule: getDefaultSchedule(),
 			};
 
 			const reqWithReminderAttached = Object.assign({}, req, {
@@ -115,7 +126,7 @@ describe("Reminder API", () => {
 
 		it("should respond with created reminder object when provided with valid reminder object", async () => {
 			const reminder = {
-				remind_on: moment("2019-04-01").format(DATE_FORMAT)
+				schedule: getDefaultSchedule()
 			};
 
 			const reqWithReminderAttached = Object.assign({}, req, {
@@ -125,7 +136,7 @@ describe("Reminder API", () => {
 			await reminderRoutes.postReminder(reqWithReminderAttached, res);
 
 			const response = res.response;
-			assert.equal(moment(response.remind_on).format(DATE_FORMAT), reminder.remind_on);
+			assert.equal(response.schedule.date, reminder.schedule.date);
 			assert.equal(response.user_id, reqWithReminderAttached.user.id);
 			assert.equal(response.hasOwnProperty("id"), true, "should have id attached");
 		});
@@ -141,7 +152,7 @@ describe("Reminder API", () => {
 		it("should throw validation error if id is already set", async () => {
 			const reminder = {
 				id: 100,
-				remind_on: moment("2019-04-01").format(DATE_FORMAT)
+				schedule: getDefaultSchedule()
 			};
 
 			const reqWithReminderAttached = Object.assign({}, req, {
@@ -151,9 +162,10 @@ describe("Reminder API", () => {
 			await assertThrowsAsync(reminderRoutes.postReminder.bind(this, reqWithReminderAttached, res), ValidationError);
 		});
 
-		it("should throw validation error if remind_on is not set", async () => {
+		it("should throw validation error if remind_on is already set", async () => {
 			const reminder = {
-				remind_on: "not a real date"
+				schedule: getDefaultSchedule(),
+				remind_on: moment().format(DATE_FORMAT)
 			};
 
 			const reqWithReminderAttached = Object.assign({}, req, {
@@ -163,9 +175,16 @@ describe("Reminder API", () => {
 			await assertThrowsAsync(reminderRoutes.postReminder.bind(this, reqWithReminderAttached, res), ValidationError);
 		});
 
-		it("should throw validation error if remind_on is a bad format", async () => {
+		it("should throw validation error if schedule is not in correct format", async () => {
 			const reminder = {
-				remind_on: "not a real date"
+				schedule: {
+					month: 8,
+					day: 24,
+					morningOf: true,
+					startOfMonth: true,
+					// weeksPrior: [1, 2, 3],
+					// daysPrior: [1, 2, 3]
+				}
 			};
 
 			const reqWithReminderAttached = Object.assign({}, req, {
@@ -173,13 +192,36 @@ describe("Reminder API", () => {
 			});
 
 			await assertThrowsAsync(reminderRoutes.postReminder.bind(this, reqWithReminderAttached, res), ValidationError);
+		});
+
+		it("should set remind_on to a valid date with valid request", async () => {
+			const reminder = {
+				schedule: {
+					month: 8,
+					day: 24,
+					morningOf: true,
+					startOfMonth: true,
+					weeksPrior: [1, 2, 3],
+					daysPrior: [1, 2, 3]
+				}
+			};
+
+			const reqWithReminderAttached = Object.assign({}, req, {
+				body: reminder
+			});
+
+			await reminderRoutes.postReminder(reqWithReminderAttached, res);
+
+			const response = res.response;
+			assert.equal(response.hasOwnProperty("remind_on"), true);
+			assert.equal(moment(response.remind_on).isValid(), true);
 		});
 	});
 
 	describe("PUT /reminder/{id}", () => {
 		it("should return 200 status code when provided with valid reminder object", async () => {
 			const reminder = {
-				remind_on: "2019-04-01",
+				schedule: getDefaultSchedule(),
 			};
 
 			const reqEditReminder = Object.assign({}, req, {
@@ -196,7 +238,7 @@ describe("Reminder API", () => {
 
 		it("should throw not found error when provided with id that does not match anything", async () => {
 			const reminder = {
-				remind_on: "2019-04-01",
+				schedule: getDefaultSchedule(),
 			};
 
 			const reqEditReminder = Object.assign({}, req, {
@@ -209,12 +251,13 @@ describe("Reminder API", () => {
 			await assertThrowsAsync(reminderRoutes.putReminder.bind(this, reqEditReminder, res), NotFoundError);
 		});
 
-		it("should save new reminder details in db", async () => {
+		it("should save new schedule details in db", async () => {
 			const REMINDER_ID = 1;
-			const REMINDER_DATE = "2020-04-01";
 			const reminder = {
-				remind_on: REMINDER_DATE,
+				schedule: getDefaultSchedule(),
 			};
+
+			reminder.schedule.month = 11;
 
 			const reqEditReminder = Object.assign({}, req, {
 				body: reminder,
@@ -229,10 +272,10 @@ describe("Reminder API", () => {
 				.where("id", REMINDER_ID)
 				.first();
 
-			assert.equal(moment(actualReminder.remind_on).format(DATE_FORMAT), REMINDER_DATE);
+			assert.equal(actualReminder.schedule.month, 11);
 		});
 
-		it("should throw validation error if remind_on is not set", async () => {
+		it("should throw validation error if schedule is not set", async () => {
 			const reminder = {
 
 			};
@@ -247,9 +290,16 @@ describe("Reminder API", () => {
 			await assertThrowsAsync(reminderRoutes.putReminder.bind(this, reqEditReminder, res), ValidationError);
 		});
 
-		it("should throw validation error if remind_on is a bad format", async () => {
+		it("should throw validation error if schedule is a bad format", async () => {
 			const reminder = {
-				remind_on: "a bad date format"
+				schedule: {
+					month: 8,
+					day: 24,
+					morningOf: true,
+					startOfMonth: true,
+					// weeksPrior: [1, 2, 3],
+					// daysPrior: [1, 2, 3]
+				}
 			};
 
 			const reqEditReminder = Object.assign({}, req, {
@@ -264,7 +314,7 @@ describe("Reminder API", () => {
 
 		it("should throw not authorized error if no user is in request", async () => {
 			const reminder = {
-				remind_on: "2019-04-01",
+				schedule: getDefaultSchedule(),
 			};
 
 			const reqEditReminder = Object.assign({}, req, {
@@ -280,7 +330,7 @@ describe("Reminder API", () => {
 
 		it("should throw not authorized error when user tries to edit reminder not owned by them", async () => {
 			const reminder = {
-				remind_on: "2019-04-01",
+				schedule: getDefaultSchedule(),
 			};
 
 			const reqEditReminder = Object.assign({}, req, {
@@ -299,10 +349,15 @@ describe("Reminder API", () => {
 
 		it("should keep reminder info the same, when user tries to edit reminder not owned by them", async () => {
 			const REMINDER_ID = 1;
-			const START_DATE = reminderSeeder.REMINDERS[REMINDER_ID - 1].remind_on;
+			const expectedReminder = await knex("reminders")
+				.where("id", REMINDER_ID)
+				.first();
+
 			const reminder = {
-				remind_on: "2020-09-10",
+				schedule: getDefaultSchedule(),
 			};
+
+			reminder.schedule.month = 4;
 
 			const reqEditReminder = Object.assign({}, req, {
 				body: reminder,
@@ -324,13 +379,13 @@ describe("Reminder API", () => {
 				.where("id", REMINDER_ID)
 				.first();
 
-			assert.equal(moment(actualReminder.remind_on).format(DATE_FORMAT), START_DATE);
+			assert.equal(actualReminder.schedule.month, expectedReminder.schedule.month);
 		});
 
 		it("should throw validation error, when user tries to set id", async () => {
 			const reminder = {
 				id: 1234,
-				remind_on: "2019-04-01",
+				schedule: getDefaultSchedule(),
 			};
 
 			const reqEditReminder = Object.assign({}, req, {
@@ -346,7 +401,7 @@ describe("Reminder API", () => {
 		it("should throw validation error, when user tries to set user_id", async () => {
 			const reminder = {
 				user_id: 1234,
-				remind_on: "2019-04-01",
+				schedule: getDefaultSchedule(),
 			};
 
 			const reqEditReminder = Object.assign({}, req, {
@@ -357,6 +412,48 @@ describe("Reminder API", () => {
 			});
 
 			await assertThrowsAsync(reminderRoutes.putReminder.bind(this, reqEditReminder, res), ValidationError);
+		});
+
+		it("should throw validation error if remind_on is already set", async () => {
+			const reminder = {
+				schedule: getDefaultSchedule(),
+				remind_on: moment().format(DATE_FORMAT)
+			};
+
+			const reqEditReminder = Object.assign({}, req, {
+				body: reminder,
+				params: {
+					id: 1
+				}
+			});
+
+			await assertThrowsAsync(reminderRoutes.putReminder.bind(this, reqEditReminder, res), ValidationError);
+		});
+
+		it("should set remind_on to a valid date with valid request", async () => {
+			const reminder = {
+				schedule: {
+					month: 8,
+					day: 24,
+					morningOf: true,
+					startOfMonth: true,
+					weeksPrior: [1, 2, 3],
+					daysPrior: [1, 2, 3]
+				}
+			};
+
+			const reqEditReminder = Object.assign({}, req, {
+				body: reminder,
+				params: {
+					id: 1
+				}
+			});
+
+			await reminderRoutes.putReminder(reqEditReminder, res);
+
+			const response = res.response;
+			assert.equal(response.hasOwnProperty("remind_on"), true);
+			assert.equal(moment(response.remind_on).isValid(), true);
 		});
 	});
 

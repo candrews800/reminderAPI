@@ -29,7 +29,7 @@ const getDefaultRes = () => {
     };
 };
 
-describe("errorHandler", () => {
+describe("LIB errorHandler", () => {
     let req, res;
     const next = () => {};
 
