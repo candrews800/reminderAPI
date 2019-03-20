@@ -17,64 +17,27 @@ class RemindOnCalculator {
 
         // add possible remind dates based on schedules
         if (this.schedule.dayOf) {
-            date = this.today.clone().set({
-                month: this.schedule.month,
-                date: this.schedule.day
-            });
+            date = this.getScheduledDate();
 
-            if (
-                date.isSame(this.today, "day")
-                || date.isBefore(this.today)
-            ) {
-                date.add(1, "year");
-            }
-
-            dates.push(date);
+            dates.push(this.addYearIfPastToday(date));
         }
 
         if (this.schedule.startOfMonth) {
-            date = this.today.clone().set("month", this.schedule.month).startOf("month");
+            date = this.getScheduledDate().startOf("month");
 
-            if (
-                date.isSame(this.today, "day")
-                || date.isBefore(this.today)
-            ) {
-                date.add(1, "year");
-            }
-
-            dates.push(date);
+            dates.push(this.addYearIfPastToday(date));
         }
 
         for (const day of this.schedule.daysPrior) {
-            date = this.today.clone().set({
-                month: this.schedule.month,
-                date: this.schedule.day
-            }).subtract(day, "day");
+            date = this.getScheduledDate().subtract(day, "day");
 
-            if (
-                date.isSame(this.today, "day")
-                || date.isBefore(this.today)
-            ) {
-                date.add(1, "year");
-            }
-
-            dates.push(date);
+            dates.push(this.addYearIfPastToday(date));
         }
 
         for (const week of this.schedule.weeksPrior) {
-            date = this.today.clone().set({
-                month: this.schedule.month,
-                date: this.schedule.day
-            }).subtract(week, "week");
+            date = this.getScheduledDate().subtract(week, "week");
 
-            if (
-                date.isSame(this.today, "day")
-                || date.isBefore(this.today)
-            ) {
-                date.add(1, "year");
-            }
-
-            dates.push(date);
+            dates.push(this.addYearIfPastToday(date));
         }
 
         if (dates.length === 0) {
@@ -89,6 +52,24 @@ class RemindOnCalculator {
 
         // pluck the first index, aka the earliest date
         return dates[0];
+    }
+
+    getScheduledDate() {
+        return this.today.clone().set({
+            month: this.schedule.month,
+            date: this.schedule.day
+        });
+    }
+
+    addYearIfPastToday(date) {
+        if (
+            date.isSame(this.today, "day")
+            || date.isBefore(this.today)
+        ) {
+            date.add(1, "year");
+        }
+
+        return date;
     }
 }
 
