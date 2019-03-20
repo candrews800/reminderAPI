@@ -6,6 +6,7 @@ const knex = require("config/knex");
 const NotAuthorizedError = require("app/lib/errors/NotAuthorizedError");
 const ValidationError = require("app/lib/errors/ValidationError");
 const NotFoundError = require("app/lib/errors/NotFoundError");
+const RemindOnCalculator = require("calc_remind_on_lib");
 
 const DATE_FORMAT = "YYYY-MM-DD";
 
@@ -39,8 +40,8 @@ const postReminder = async (req, res) => {
 
     reminder.user_id = user.id;
 
-    // TODO: Calculate remind_on based on schedule
-    reminder.remind_on = moment().format(DATE_FORMAT);
+    const remindOnCalc = new RemindOnCalculator(reminder.schedule);
+    reminder.remind_on = remindOnCalc.getNextReminderDate().format(DATE_FORMAT);
 
     const results = await knex("reminders")
         .insert(req.body)
@@ -73,9 +74,9 @@ const putReminder = async (req, res) => {
         throw new ValidationError(err);
     }
 
+    const remindOnCalc = new RemindOnCalculator(req.body.schedule);
     const params = Object.assign({}, req.body, {
-        // TODO: Calculate remind_on based on schedule
-        remind_on: moment().format(DATE_FORMAT)
+        remind_on: remindOnCalc.getNextReminderDate().format(DATE_FORMAT)
     });
 
     await knex("reminders")
@@ -126,7 +127,7 @@ const validateSchedule = (schedule) => {
     const rules = {
         month: validateDate,
         day: validateDate,
-        morningOf: (value) => { return typeof value === "boolean"; },
+        dayOf: (value) => { return typeof value === "boolean"; },
         startOfMonth: (value) => { return typeof value === "boolean"; },
         weeksPrior: (value) => { return Array.isArray(value); },
         daysPrior: (value) => { return Array.isArray(value); },

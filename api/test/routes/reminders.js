@@ -58,7 +58,7 @@ const getDefaultSchedule = () => {
 	return {
 		month: 8,
 		day: 24,
-		dayOf: false,
+		dayOf: true,
 		startOfMonth: false,
 		weeksPrior: [],
 		daysPrior: []

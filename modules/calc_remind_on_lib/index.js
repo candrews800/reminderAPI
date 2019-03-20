@@ -6,7 +6,7 @@ class RemindOnCalculator {
     constructor(schedule) {
         this.schedule = schedule;
 
-        this.today = this.setToday(moment());
+        this.today = moment();
     }
 
     setToday(date) {

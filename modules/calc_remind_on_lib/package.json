@@ -1,6 +1,6 @@
 {
   "name": "calc_remind_on_lib",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "lib for date reminder app to calculate next remind on based on schedule",
   "main": "index.js",
   "scripts": {
