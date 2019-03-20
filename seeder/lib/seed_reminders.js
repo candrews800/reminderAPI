@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = {
     doSeed: function (knex, REMINDERS) {
         return knex("reminders").insert(REMINDERS || this.REMINDERS);

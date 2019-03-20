@@ -1,3 +1,5 @@
+"use strict";
+
 const reminderRoutes = require("app/routes/reminders");
 
 // app/routes.js

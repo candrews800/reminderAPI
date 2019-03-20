@@ -1,3 +1,5 @@
+"use strict";
+
 const AppError = require("./AppError");
 
 class ValidationError extends AppError {

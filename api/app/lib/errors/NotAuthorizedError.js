@@ -1,3 +1,5 @@
+"use strict";
+
 const AppError = require("./AppError");
 
 class NotAuthorizedError extends AppError {

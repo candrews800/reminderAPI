@@ -1,3 +1,4 @@
+"use strict";
 
 module.exports = {
     doSeed: function (knex, USERS) {

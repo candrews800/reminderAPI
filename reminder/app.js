@@ -1,3 +1,5 @@
+"use strict";
+
 const getReadyReminders = require("lib/get_ready_reminders");
 
 const processReminder = async (reminder) => {

@@ -1,3 +1,5 @@
+"use strict";
+
 const knex = require("config/knex");
 
 module.exports = async () => {

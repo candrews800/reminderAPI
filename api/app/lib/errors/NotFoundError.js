@@ -1,3 +1,5 @@
+"use strict";
+
 const AppError = require("./AppError");
 
 const STATUS_CODE = 404;

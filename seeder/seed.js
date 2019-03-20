@@ -1,3 +1,5 @@
+"use strict";
+
 const cleanSeeds = require("./lib/clean_seeds");
 const userSeeder = require("./lib/seed_users");
 const reminderSeeder = require("./lib/seed_reminders");
