@@ -12,33 +12,11 @@ class RemindOnCalculator {
     }
 
     getNextReminderDate() {
-        let date;
-        const dates = [];
-
         // add possible remind dates based on schedules
-        if (this.schedule.dayOf) {
-            date = this.getScheduledDate();
-
-            dates.push(this.addYearIfPastToday(date));
-        }
-
-        if (this.schedule.startOfMonth) {
-            date = this.getScheduledDate().startOf("month");
-
-            dates.push(this.addYearIfPastToday(date));
-        }
-
-        for (const day of this.schedule.daysPrior) {
-            date = this.getScheduledDate().subtract(day, "day");
-
-            dates.push(this.addYearIfPastToday(date));
-        }
-
-        for (const week of this.schedule.weeksPrior) {
-            date = this.getScheduledDate().subtract(week, "week");
-
-            dates.push(this.addYearIfPastToday(date));
-        }
+        const dates = this.getDayOfDates()
+            .concat(this.getStartOfMonthDates())
+            .concat(this.getWeeksPriorDates())
+            .concat(this.getDaysPriorDates());
 
         if (dates.length === 0) {
             console.error("No current scheduled date selected. Setting date to time in past");
@@ -52,6 +30,52 @@ class RemindOnCalculator {
 
         // pluck the first index, aka the earliest date
         return dates[0];
+    }
+
+    getDayOfDates() {
+        const dates = [];
+
+        if (this.schedule.dayOf) {
+            dates.push(this.addYearIfPastToday(this.getScheduledDate()));
+        }
+
+        return dates;
+    }
+
+    getStartOfMonthDates() {
+        const dates = [];
+
+        if (this.schedule.startOfMonth) {
+            const date = this.getScheduledDate().startOf("month");
+
+            dates.push(this.addYearIfPastToday(date));
+        }
+
+        return dates;
+    }
+
+    getWeeksPriorDates() {
+        const dates = [];
+
+        for (const week of this.schedule.weeksPrior) {
+            const date = this.getScheduledDate().subtract(week, "week");
+
+            dates.push(this.addYearIfPastToday(date));
+        }
+
+        return dates;
+    }
+
+    getDaysPriorDates() {
+        const dates = [];
+
+        for (const day of this.schedule.daysPrior) {
+            const date = this.getScheduledDate().subtract(day, "day");
+
+            dates.push(this.addYearIfPastToday(date));
+        }
+
+        return dates;
     }
 
     getScheduledDate() {
