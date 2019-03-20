@@ -45,7 +45,7 @@ class RemindOnCalculator {
             return moment("1970-01-01")
         }
 
-        // sort through possible remind dates
+        // sort possible remind dates in ascending order, earliest first
         dates.sort((a, b) => {
             return a.isBefore(b) ? -1 : 1;
         });
