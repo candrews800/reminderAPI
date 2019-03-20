@@ -12,7 +12,7 @@ module.exports = {
             schedule: {
                 month: 0,
                 day: 1,
-                morningOf: true,
+                dayOf: true,
                 startOfMonth: true,
                 weeksPrior: [],
                 daysPrior: []
@@ -27,7 +27,7 @@ module.exports = {
             schedule: {
                 month: 1,
                 day: 1,
-                morningOf: true,
+                dayOf: true,
                 startOfMonth: true,
                 weeksPrior: [],
                 daysPrior: []
@@ -42,7 +42,7 @@ module.exports = {
             schedule: {
                 month: 2,
                 day: 1,
-                morningOf: true,
+                dayOf: true,
                 startOfMonth: true,
                 weeksPrior: [],
                 daysPrior: []

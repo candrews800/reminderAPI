@@ -1,6 +1,7 @@
 const getReadyReminders = require("lib/get_ready_reminders");
 
 const processReminder = async (reminder) => {
+    // TODO: SEND EMAIL
     console.log(reminder);
 };
 

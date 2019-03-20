@@ -58,7 +58,7 @@ const getDefaultSchedule = () => {
 	return {
 		month: 8,
 		day: 24,
-		morningOf: false,
+		dayOf: false,
 		startOfMonth: false,
 		weeksPrior: [],
 		daysPrior: []
@@ -180,7 +180,7 @@ describe("Reminder API", () => {
 				schedule: {
 					month: 8,
 					day: 24,
-					morningOf: true,
+					dayOf: true,
 					startOfMonth: true,
 					// weeksPrior: [1, 2, 3],
 					// daysPrior: [1, 2, 3]
@@ -199,7 +199,7 @@ describe("Reminder API", () => {
 				schedule: {
 					month: 8,
 					day: 24,
-					morningOf: true,
+					dayOf: true,
 					startOfMonth: true,
 					weeksPrior: [1, 2, 3],
 					daysPrior: [1, 2, 3]
@@ -295,7 +295,7 @@ describe("Reminder API", () => {
 				schedule: {
 					month: 8,
 					day: 24,
-					morningOf: true,
+					dayOf: true,
 					startOfMonth: true,
 					// weeksPrior: [1, 2, 3],
 					// daysPrior: [1, 2, 3]
@@ -435,7 +435,7 @@ describe("Reminder API", () => {
 				schedule: {
 					month: 8,
 					day: 24,
-					morningOf: true,
+					dayOf: true,
 					startOfMonth: true,
 					weeksPrior: [1, 2, 3],
 					daysPrior: [1, 2, 3]
