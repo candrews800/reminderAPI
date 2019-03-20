@@ -1,8 +1,5 @@
 const moment = require("moment");
 
-const CURRENT_YEAR = moment().format("YYYY");
-const NEXT_YEAR = moment().add(1, "year").format("YYYY");
-
 class RemindOnCalculator {
     constructor(schedule) {
         this.schedule = schedule;
