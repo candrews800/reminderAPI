@@ -153,6 +153,63 @@ const validateSchedule = (schedule) => {
     return true;
 };
 
+const validateMeta = (meta) => {
+    if (!meta || typeof meta !== "object") {
+        return "invalid meta object";
+    }
+
+    const requiredKeys = [
+        "type", "title", "desc"
+    ];
+
+    for (const required of requiredKeys) {
+        if (!meta.hasOwnProperty(required)) {
+            return "missing required meta key: " + required;
+        }
+    }
+
+    const validateBetween = (key, min, max) => {
+        return (value) => {
+            if (value.length < min) {
+                return key + " needs to be at least " + min + " chars long";
+            }
+
+            if (value.length > max) {
+                return key + " needs cannot be greater than " + max + " chars long";
+            }
+
+            return true;
+        };
+    };
+
+    const rules = {
+        type: (value) => {
+            return ["GENERIC"].indexOf(value) === -1 ? "meta.type is not in approved list" : true;
+        },
+        title: validateBetween("title", 1, 100),
+        desc: validateBetween("desc",0, 1000)
+    };
+
+    for (const key in rules) {
+        if (!rules.hasOwnProperty(key)) {
+            continue;
+        }
+
+        if (!meta.hasOwnProperty(key)) {
+            continue;
+        }
+
+        const value = meta[key];
+        const err = rules[key](value);
+
+        if (err !== true) {
+            return err;
+        }
+    }
+
+    return true;
+};
+
 const validateReminder = (reminder) => {
     // Do not allow user to supply their own id
     if (typeof reminder.id !== "undefined") {
@@ -169,7 +226,13 @@ const validateReminder = (reminder) => {
         return "Cannot set remind_on.";
     }
 
-    const err = validateSchedule(reminder.schedule);
+    let err = validateSchedule(reminder.schedule);
+
+    if (err !== true) {
+        return err;
+    }
+
+    err = validateMeta(reminder.meta);
 
     if (err !== true) {
         return err;
