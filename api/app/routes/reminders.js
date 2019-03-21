@@ -41,10 +41,10 @@ const postReminder = async (req, res) => {
     reminder.user_id = user.id;
 
     const remindOnCalc = new RemindOnCalculator(reminder.schedule);
-    reminder.remind_on = remindOnCalc.getNextReminderDate().format(DATE_FORMAT);
+    reminder.remind_on = remindOnCalc.getNextReminderDate();
 
     const results = await knex("reminders")
-        .insert(req.body)
+        .insert(reminder)
         .returning("*");
 
     res.statusCode(200).json(results[0]);
@@ -76,7 +76,7 @@ const putReminder = async (req, res) => {
 
     const remindOnCalc = new RemindOnCalculator(req.body.schedule);
     const params = Object.assign({}, req.body, {
-        remind_on: remindOnCalc.getNextReminderDate().format(DATE_FORMAT)
+        remind_on: remindOnCalc.getNextReminderDate()
     });
 
     await knex("reminders")

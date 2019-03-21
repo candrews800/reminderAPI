@@ -1,16 +1,11 @@
 "use strict";
 
-const getReadyReminders = require("lib/get_ready_reminders");
-
-const processReminder = async (reminder) => {
-    // TODO: SEND EMAIL
-    console.log(reminder);
-};
+const reminderService = require("lib/reminder_service");
 
 const runService = async (onFinish) => {
-    const reminders = await getReadyReminders();
+    const reminders = await reminderService.getReadyReminders();
 
-    const reminderPromises = reminders.map(reminder => processReminder(reminder));
+    const reminderPromises = reminders.map(reminder => reminderService.processReminder(reminder));
 
     await Promise.all(reminderPromises);
 
