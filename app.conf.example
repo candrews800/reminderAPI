@@ -1,4 +1,6 @@
 export PG_DB=database_name
 export PG_USER=username_here
 export PG_PW=password_here
+export MAILGUN_API_KEY=api_key_here
+export MAILGUN_DOMAIN=domain_here
 export BASE_PATH=/opt/important_date_reminders

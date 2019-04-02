@@ -58,6 +58,22 @@ describe("reminder service", () => {
             assert.equal(result.length, 1);
         });
 
+        it("should return reminder with email attached to object", async () => {
+            const reminders = getDefaultReminderSeed();
+
+            for (const reminder of reminders) {
+                reminder.remind_on = TOMORROW_DATE;
+            }
+
+            reminders[0].remind_on = YESTERDAY_DATE;
+
+            await seedReminders(reminders);
+
+            const result = await reminderService.getReadyReminders();
+
+            assert.equal(result.length, 1);
+        });
+
         it("should return 2 reminders when 2 reminders has remind_on older than the present date", async () => {
             const reminders = getDefaultReminderSeed();
 
@@ -103,6 +119,61 @@ describe("reminder service", () => {
             assert.equal(
                 moment(actualReminder.remind_on).format("MM-DD"),
                 "04-18"
+            );
+        });
+    });
+
+    describe("sendEmail", () => {
+        it("should send email to user of reminder", async () => {
+            const reminders = getDefaultReminderSeed();
+            const reminder = reminders[0];
+            reminder.email = "test@reminder.com";
+
+            const results = await reminderService.sendEmail(reminder);
+            const message = JSON.parse(results.message);
+
+            assert.equal(
+                message.to[0].address,
+                "test@reminder.com"
+            );
+        });
+
+        it("should contain the scheduled date as part of the email body", async () => {
+            const reminders = getDefaultReminderSeed();
+            const reminder = reminders[0];
+            const date = moment()
+                .set("month", reminder.schedule.month)
+                .set("date", reminder.schedule.day)
+                .format("MMM Do");
+
+            const results = await reminderService.sendEmail(reminder);
+            const message = JSON.parse(results.message);
+            const messageBody = message.text;
+
+            assert.equal(
+                true,
+                messageBody.includes(date),
+                "missing string: " + date
+            );
+        });
+
+        it("should contain the meta title in the body", async () => {
+            const reminders = getDefaultReminderSeed();
+            const reminder = reminders[0];
+            const TITLE = "Clinton's Birthday";
+
+            reminder.meta = {
+                title: TITLE
+            };
+
+            const results = await reminderService.sendEmail(reminder);
+            const message = JSON.parse(results.message);
+            const messageBody = message.text;
+
+            assert.equal(
+                true,
+                messageBody.includes(TITLE),
+                "missing string: " + TITLE
             );
         });
     });

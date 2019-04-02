@@ -6,6 +6,10 @@
       "database": "$PG_DB",
       "password": "$PG_PW",
       "port": 5432
+    },
+    "mailgun": {
+      "api_key": "$MAILGUN_API_KEY",
+      "domain": "$MAILGUN_DOMAIN"
     }
   },
   "development": {
