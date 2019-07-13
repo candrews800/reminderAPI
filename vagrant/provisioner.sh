@@ -17,4 +17,6 @@ source ../app.conf
 
 /bin/bash ./provisioners/migrations.sh
 
+/bin/bash ./provisioners/nginx.sh
+
 /bin/bash ./provisioners/start-services.sh
