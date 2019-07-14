@@ -29,6 +29,11 @@ server {
     rewrite ^/auth/(.*) /\$1 break;
     proxy_pass http://127.0.0.1:3000;
   }
+
+  location /api {
+    rewrite ^/api/(.*) /\$1 break;
+    proxy_pass http://127.0.0.1:3000;
+  }
 }
 
 EOF
