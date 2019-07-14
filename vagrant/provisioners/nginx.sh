@@ -24,6 +24,11 @@ server {
   location / {
     try_files \$uri \$uri/ /index.html;
   }
+
+  location /auth {
+    rewrite ^/auth/(.*) /\$1 break;
+    proxy_pass http://127.0.0.1:3000;
+  }
 }
 
 EOF
